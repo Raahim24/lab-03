@@ -14,21 +14,22 @@ import androidx.fragment.app.DialogFragment;
 
 public class EditCityFragment extends DialogFragment {
 
-    private City city;
-    private EditCityDialogListener listener;
-
-    // Listener for communicating back to MainActivity
+    // Listener interface to communicate back to MainActivity
     interface EditCityDialogListener {
-        void onCityEdited();
+        void editCity(int position, String newName, String newProvince);
     }
 
-    // Factory method (recommended)
-    public static EditCityFragment newInstance(City city) {
-        Bundle args = new Bundle();
-        args.putSerializable("city", city); // City must implement Serializable
-        EditCityFragment fragment = new EditCityFragment();
-        fragment.setArguments(args);
-        return fragment;
+    private EditCityDialogListener listener;
+
+    private int position;   // position of city in list
+    private String name;    // current name
+    private String province; // current province
+
+    // Setter method for passing data
+    public void setCityData(int position, String name, String province) {
+        this.position = position;
+        this.name = name;
+        this.province = province;
     }
 
     @Override
@@ -37,8 +38,7 @@ public class EditCityFragment extends DialogFragment {
         if (context instanceof EditCityDialogListener) {
             listener = (EditCityDialogListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement EditCityDialogListener");
+            throw new RuntimeException(context + " must implement EditCityDialogListener");
         }
     }
 
@@ -50,24 +50,20 @@ public class EditCityFragment extends DialogFragment {
         EditText editCityName = view.findViewById(R.id.edit_text_city_text);
         EditText editProvinceName = view.findViewById(R.id.edit_text_province_text);
 
-        // Load the city object
-        city = (City) requireArguments().getSerializable("city");
+        // Pre-fill current values
+        editCityName.setText(name);
+        editProvinceName.setText(province);
 
-        // Pre-fill the fields
-        editCityName.setText(city.getName());
-        editProvinceName.setText(city.getProvince());
-
-        return new AlertDialog.Builder(getContext())
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        return builder
                 .setView(view)
                 .setTitle("Edit City")
                 .setNegativeButton("Cancel", null)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    // Update the City object
-                    city.setName(editCityName.getText().toString());
-                    city.setProvince(editProvinceName.getText().toString());
-                    listener.onCityEdited(); // notify activity to refresh
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newName = editCityName.getText().toString();
+                    String newProvince = editProvinceName.getText().toString();
+                    listener.editCity(position, newName, newProvince);
                 })
                 .create();
     }
 }
-

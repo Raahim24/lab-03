@@ -23,7 +23,10 @@ public class MainActivity extends AppCompatActivity implements AddCityFragment.A
     }
 
     @Override
-    public void onCityEdited() {
+    public void editCity(int position, String newName, String newProvince) {
+        City city = dataList.get(position);
+        city.setName(newName);
+        city.setProvince(newProvince);
         cityAdapter.notifyDataSetChanged();
     }
 
@@ -55,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements AddCityFragment.A
 
         cityList.setOnItemClickListener((parent, view, position, id) -> {
             City selectedCity = dataList.get(position);
-            EditCityFragment editDialog = EditCityFragment.newInstance(selectedCity);
+            EditCityFragment editDialog = new EditCityFragment();
+            editDialog.setCityData(position, selectedCity.getName(), selectedCity.getProvince());
             editDialog.show(getSupportFragmentManager(), "Edit City");
         });
     }
